@@ -65,23 +65,23 @@ class CryptoService {
    * - Output: 32 bytes (256 bits)
    */
   async deriveMasterKey(masterPassword: string, saltB64: string): Promise<Uint8Array> {
-    this.ensureInitialized()
-    
-    const salt = sodium.from_base64(saltB64)
-    const masterKey = sodium.crypto_pwhash(
-      32, // 256-bit key
-      masterPassword,
-      salt,
-      3, // iterations (minimum recommended)
-      67108864, // 64MB memory
-      sodium.crypto_pwhash_ALG_ARGON2ID
-    )
-    
-    // Store in memory for session use
-    this.masterKey = new Uint8Array(masterKey)
-    
-    return this.masterKey
-  }
+  this.ensureInitialized()
+  
+  const salt = sodium.from_base64(saltB64)
+
+  // phải có await ở đây
+  const masterKey = await sodium.crypto_pwhash(
+    32, // độ dài output
+    masterPassword,
+    salt,
+    3, // iterations
+    67108864, // 64MB
+    sodium.crypto_pwhash_ALG_ARGON2ID
+  )
+
+  this.masterKey = new Uint8Array(masterKey)
+  return this.masterKey
+}
 
   /**
    * Encrypt vault data using XChaCha20-Poly1305 AEAD
